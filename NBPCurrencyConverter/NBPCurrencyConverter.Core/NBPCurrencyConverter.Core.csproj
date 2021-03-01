@@ -8,4 +8,12 @@
     <ProjectReference Include="..\NBPCurrencyConverter.Data\NBPCurrencyConverter.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Mapper\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
 </Project>
