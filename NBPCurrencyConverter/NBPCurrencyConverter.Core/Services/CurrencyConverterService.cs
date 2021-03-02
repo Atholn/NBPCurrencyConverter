@@ -29,31 +29,33 @@ namespace NBPCurrencyConverter.Core.Services
             _mapper = mapper;
         }
 
-        public async Task<decimal> CurrencyConverterAsync(TransactionDto transactionDto)
+        public async Task<decimal> CurrencyConverterAsync(TransactionDto transaction)
         {
+            if (transaction.CurrencyCodeFrom.Length != 3 || transaction.CurrencyCodeTo.Length != 3)
+            {
+                throw new Exception($"Currency code must have 3 letters");
+            }
+
             var rates = await GetListCurrencyAsync();
 
-            transactionDto.CurrencyCodeFrom = transactionDto.CurrencyCodeFrom.ToUpper();
-            transactionDto.CurrencyCodeTo = transactionDto.CurrencyCodeTo.ToUpper();
+            if (!rates.Any(x=> x.Code == transaction.CurrencyCodeFrom) 
+                || !rates.Any(x => x.Code == transaction.CurrencyCodeTo))
+            {
+                throw new Exception($"Bad currency code, It is not in the list of currencies");
+            }
 
+            transaction.CurrencyCodeFrom = transaction.CurrencyCodeFrom.ToUpper();
+            transaction.CurrencyCodeTo = transaction.CurrencyCodeTo.ToUpper();
 
-            var operationInfo = _mapper.Map<OperationInfo>(transactionDto);
+            var operationInfo = _mapper.Map<OperationInfo>(transaction);
             operationInfo.OperationDate = DateTime.Now;
             operationInfo.OperationTitle = "Currency convert";
-            //OperationInfo operationInfo = new OperationInfo()
-            //{
-            //    Amount = transactionDto.Amount,
-            //    CurrencyCodeFrom = transactionDto.CurrencyCodeFrom,
-            //    CurrencyCodeTo = transactionDto.CurrencyCodeTo,
-            //    OperationDate = DateTime.Now,
-            //    OperationTitle = "Currency convert",
-            //};
 
-            operationInfo.Result = transactionDto.Amount *
-            rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyCodeFrom).Mid /
-            rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyCodeTo).Mid;
+            operationInfo.Result = transaction.Amount *
+            rates.FirstOrDefault(x => x.Code == transaction.CurrencyCodeFrom).Mid /
+            rates.FirstOrDefault(x => x.Code == transaction.CurrencyCodeTo).Mid;
 
-            operationInfo.CurrencyMidFrom = rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyCodeFrom).Mid;
+            operationInfo.CurrencyMidFrom = rates.FirstOrDefault(x => x.Code == transaction.CurrencyCodeFrom).Mid;
 
             await _currencyConverterRepository.AddOperationInfoAsync(operationInfo);
 
@@ -97,7 +99,6 @@ namespace NBPCurrencyConverter.Core.Services
                 
             });
             return rates;
-
         }
     }
 }

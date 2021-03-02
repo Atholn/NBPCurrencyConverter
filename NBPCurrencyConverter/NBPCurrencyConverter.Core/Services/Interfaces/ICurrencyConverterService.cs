@@ -9,7 +9,7 @@ namespace NBPCurrencyConverter.Core.Services.Interfaces
 {
     public interface ICurrencyConverterService
     {
-        Task<decimal> CurrencyConverterAsync(TransactionDto transactionDto);
+        Task<decimal> CurrencyConverterAsync(TransactionDto transaction);
         Task<ICollection<Rate>> GetListCurrencyOfRatesAsync();
         Task<ICollection<string>> GetListCurrencyCodeAsync();
         

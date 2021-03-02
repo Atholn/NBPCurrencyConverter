@@ -47,6 +47,7 @@ namespace NBPCurrencyConverter.Api
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
+                c.EnableAnnotations();
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "NBPCurrencyConverter.Api", Version = "v1" });
             });
         }

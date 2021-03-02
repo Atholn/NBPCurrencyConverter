@@ -42,6 +42,7 @@ namespace NBPCurrencyConverter.Api.Controllers
         public async Task<ActionResult> GetCurrencyOfRates()
         {
             var result = await _currencyConverterService.GetListCurrencyOfRatesAsync();
+
             return Ok(result);
         }
     }
