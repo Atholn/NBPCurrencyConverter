@@ -18,7 +18,43 @@ namespace NBPCurrencyConverter.Core.Services
     public class CurrencyConverterService : ICurrencyConverterService
     {
         private const string url = "http://api.nbp.pl/api/exchangerates/tables/a/?format=json";
-        public async Task<decimal> CurrencyRate(TransactionDto transactionDto)
+
+        public async Task<decimal> CurrencyConverterAsync(TransactionDto transactionDto)
+        {
+            var rates = await GetListCurrencyAsync();
+
+            if ( transactionDto.CurrencyFrom == "PLN")
+                return Decimal.Round(
+                    transactionDto.Amount /
+                    rates.Where(x => x.Code == transactionDto.CurrencyTo).Select(x => x.Mid).Single(), 
+                    2);
+
+            if (transactionDto.CurrencyTo == "PLN")
+                return Decimal.Round(
+                    transactionDto.Amount *
+                    rates.Where(x => x.Code == transactionDto.CurrencyFrom).Select(x => x.Mid).Single(),
+                    2);
+
+            return Decimal.Round(
+                transactionDto.Amount *
+                rates.Where(x => x.Code == transactionDto.CurrencyFrom).Select(x => x.Mid).Single()/
+                rates.Where(x => x.Code == transactionDto.CurrencyTo).Select(x => x.Mid).Single(),
+                2);
+        }
+
+        public async Task<ICollection<Rate>> GetListCurrencyOfRatesAsync()
+        {
+            var rates = await GetListCurrencyAsync();
+            return rates;
+        }
+
+        public async Task<ICollection<string>> GetListCurrencyCodeAsync()
+        {
+            var rates = await GetListCurrencyAsync();
+            return rates.Select(x => x.Code).ToList();
+        }
+
+        public async Task<ICollection<Rate>> GetListCurrencyAsync()
         {
             WebRequest requestObjGet = WebRequest.Create(url);
             requestObjGet.Method = "GET";
@@ -33,15 +69,10 @@ namespace NBPCurrencyConverter.Core.Services
             }
 
             var content = JsonConvert.DeserializeObject<ICollection<TableRates>>(json);
-            ICollection<Rates> rates = null;
-            foreach (var item in content) { rates = item.Rates;};
+            ICollection<Rate> rates = null;
+            foreach (var item in content) { rates = item.Rates; };
 
-            return Decimal.Round(
-                transactionDto.Amount *
-                rates.Where(x => x.Code == transactionDto.CurrencyFrom).Select(x => x.Mid).Single()/
-                rates.Where(x => x.Code == transactionDto.CurrencyTo).Select(x => x.Mid).Single(),
-                2);
+            return rates;
         }
-
     }
 }

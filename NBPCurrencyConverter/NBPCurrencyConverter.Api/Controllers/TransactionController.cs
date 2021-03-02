@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NBPCurrencyConverter.Core.ModelsDTO;
 using NBPCurrencyConverter.Core.Services.Interfaces;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,11 +21,28 @@ namespace NBPCurrencyConverter.Api.Controllers
             _currencyConverterService = currencyConverterService;
         }
 
+        [SwaggerOperation(Summary = "Convert rate")]
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] TransactionDto transactionDto)
         {
-            var result = await _currencyConverterService.CurrencyRate(transactionDto);
-            return Ok(result); //: BadRequest(result.ErrorMessage);
+            var result = await _currencyConverterService.CurrencyConverterAsync(transactionDto);
+            return Ok(result);
+        }
+
+        [SwaggerOperation(Summary = "Retrieves code currency")]
+        [HttpGet("Code")]
+        public async Task<ActionResult> GetCodeCurrency()
+        {
+            var result = await _currencyConverterService.GetListCurrencyCodeAsync();
+            return Ok(result);
+        }
+
+        [SwaggerOperation(Summary = "Retrieves currency rates")]
+        [HttpGet("Currency")]
+        public async Task<ActionResult> GetCurrencyOfRates()
+        {
+            var result = await _currencyConverterService.GetListCurrencyOfRatesAsync();
+            return Ok(result);
         }
     }
 }
