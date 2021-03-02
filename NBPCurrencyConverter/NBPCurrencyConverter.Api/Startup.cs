@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,6 +11,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using NBPCurrencyConverter.Core.Services;
 using NBPCurrencyConverter.Core.Services.Interfaces;
+using NBPCurrencyConverter.Data;
+using NBPCurrencyConverter.Data.Repositories;
+using NBPCurrencyConverter.Data.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +33,16 @@ namespace NBPCurrencyConverter.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ICurrencyConverterService, CurrencyConverterService>();
+            services.AddDbContext<BaseContext>(o =>
+            {
+                o.UseSqlServer(Configuration["ConnectionStrings:SqlConnectionString"]);
+            });
+
+            services.AddScoped<ICurrencyConverterService, CurrencyConverterService>()
+                    .AddScoped<ICurrencyConverterRepository, CurrencyConverterRepository>();
+
+
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

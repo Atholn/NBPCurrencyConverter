@@ -1,5 +1,7 @@
 ﻿using NBPCurrencyConverter.Core.ModelsDTO;
 using NBPCurrencyConverter.Core.Services.Interfaces;
+using NBPCurrencyConverter.Data.Models;
+using NBPCurrencyConverter.Data.Repositories.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,28 +20,63 @@ namespace NBPCurrencyConverter.Core.Services
     public class CurrencyConverterService : ICurrencyConverterService
     {
         private const string url = "http://api.nbp.pl/api/exchangerates/tables/a/?format=json";
-
+        private readonly ICurrencyConverterRepository _currencyConverterRepository;
+        public CurrencyConverterService(ICurrencyConverterRepository currencyConverterRepository)
+        {
+            _currencyConverterRepository = currencyConverterRepository;
+        }
         public async Task<decimal> CurrencyConverterAsync(TransactionDto transactionDto)
         {
             var rates = await GetListCurrencyAsync();
 
-            if ( transactionDto.CurrencyFrom == "PLN")
-                return Decimal.Round(
-                    transactionDto.Amount /
-                    rates.Where(x => x.Code == transactionDto.CurrencyTo).Select(x => x.Mid).Single(), 
-                    2);
+            transactionDto.CurrencyFrom = transactionDto.CurrencyFrom.ToUpper();
+            transactionDto.CurrencyTo = transactionDto.CurrencyTo.ToUpper();
 
-            if (transactionDto.CurrencyTo == "PLN")
-                return Decimal.Round(
-                    transactionDto.Amount *
-                    rates.Where(x => x.Code == transactionDto.CurrencyFrom).Select(x => x.Mid).Single(),
-                    2);
+            OperationInfo operationInfo = new OperationInfo()
+            {
+                Amount = transactionDto.Amount,
+                CurrencyCodeFrom = transactionDto.CurrencyFrom,
+                CurrencyCodeTo = transactionDto.CurrencyTo,
+                OperationDate = DateTime.Now,
+                OperationTitle = "Currency convert",
+            };
 
-            return Decimal.Round(
-                transactionDto.Amount *
-                rates.Where(x => x.Code == transactionDto.CurrencyFrom).Select(x => x.Mid).Single()/
-                rates.Where(x => x.Code == transactionDto.CurrencyTo).Select(x => x.Mid).Single(),
-                2);
+            //if (transactionDto.CurrencyFrom == "PLN" && transactionDto.CurrencyTo == "PLN")
+            //{
+            //    operationInfo.Result = transactionDto.Amount;
+
+            //    operationInfo.CurrencyMidFrom = 1;
+            //    operationInfo.CurrencyMidTo = 1;
+            //}
+            //else if (transactionDto.CurrencyFrom == "PLN")
+            //{
+            //    operationInfo.Result = transactionDto.Amount /
+            //    rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyTo).Mid;
+
+            //    operationInfo.CurrencyMidFrom = 1;
+            //    operationInfo.CurrencyMidTo = rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyTo).Mid;
+            //}
+            //else if (transactionDto.CurrencyTo == "PLN")
+            //{
+            //    operationInfo.Result = transactionDto.Amount *
+            //    rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyFrom).Mid;
+
+            //    operationInfo.CurrencyMidFrom = rates.Where(x => x.Code == transactionDto.CurrencyFrom).Select(x => x.Mid).Single();
+            //    operationInfo.CurrencyMidTo = 1;
+            //}
+            //else
+            {
+                operationInfo.Result = transactionDto.Amount *
+                rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyFrom).Mid/
+                rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyTo).Mid;
+
+                operationInfo.CurrencyMidFrom = rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyFrom).Mid;
+                operationInfo.CurrencyMidTo = rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyTo).Mid;
+            }
+
+            await _currencyConverterRepository.AddOperationInfoAsync(operationInfo);
+
+            return Decimal.Round(operationInfo.Result, 2);
         }
 
         public async Task<ICollection<Rate>> GetListCurrencyOfRatesAsync()
@@ -72,6 +109,7 @@ namespace NBPCurrencyConverter.Core.Services
             ICollection<Rate> rates = null;
             foreach (var item in content) { rates = item.Rates; };
 
+            rates.Add(new Rate { Code = "PLN", Mid = 1.0000m, Currency = "Polski złoty" });
             return rates;
         }
     }
