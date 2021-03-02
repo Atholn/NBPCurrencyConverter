@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using NBPCurrencyConverter.Core.Mapper;
 using NBPCurrencyConverter.Core.Services;
 using NBPCurrencyConverter.Core.Services.Interfaces;
 using NBPCurrencyConverter.Data;
@@ -41,7 +42,7 @@ namespace NBPCurrencyConverter.Api
             services.AddScoped<ICurrencyConverterService, CurrencyConverterService>()
                     .AddScoped<ICurrencyConverterRepository, CurrencyConverterRepository>();
 
-
+            services.AddSingleton(AutoMapperConfig.Initialize());
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

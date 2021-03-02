@@ -1,4 +1,5 @@
-﻿using NBPCurrencyConverter.Core.ModelsDTO;
+﻿using AutoMapper;
+using NBPCurrencyConverter.Core.ModelsDTO;
 using NBPCurrencyConverter.Core.Services.Interfaces;
 using NBPCurrencyConverter.Data.Models;
 using NBPCurrencyConverter.Data.Repositories.Interfaces;
@@ -21,58 +22,38 @@ namespace NBPCurrencyConverter.Core.Services
     {
         private const string url = "http://api.nbp.pl/api/exchangerates/tables/a/?format=json";
         private readonly ICurrencyConverterRepository _currencyConverterRepository;
-        public CurrencyConverterService(ICurrencyConverterRepository currencyConverterRepository)
+        private readonly IMapper _mapper;
+        public CurrencyConverterService(ICurrencyConverterRepository currencyConverterRepository, IMapper mapper)
         {
             _currencyConverterRepository = currencyConverterRepository;
+            _mapper = mapper;
         }
+
         public async Task<decimal> CurrencyConverterAsync(TransactionDto transactionDto)
         {
             var rates = await GetListCurrencyAsync();
 
-            transactionDto.CurrencyFrom = transactionDto.CurrencyFrom.ToUpper();
-            transactionDto.CurrencyTo = transactionDto.CurrencyTo.ToUpper();
+            transactionDto.CurrencyCodeFrom = transactionDto.CurrencyCodeFrom.ToUpper();
+            transactionDto.CurrencyCodeTo = transactionDto.CurrencyCodeTo.ToUpper();
 
-            OperationInfo operationInfo = new OperationInfo()
-            {
-                Amount = transactionDto.Amount,
-                CurrencyCodeFrom = transactionDto.CurrencyFrom,
-                CurrencyCodeTo = transactionDto.CurrencyTo,
-                OperationDate = DateTime.Now,
-                OperationTitle = "Currency convert",
-            };
 
-            //if (transactionDto.CurrencyFrom == "PLN" && transactionDto.CurrencyTo == "PLN")
+            var operationInfo = _mapper.Map<OperationInfo>(transactionDto);
+            operationInfo.OperationDate = DateTime.Now;
+            operationInfo.OperationTitle = "Currency convert";
+            //OperationInfo operationInfo = new OperationInfo()
             //{
-            //    operationInfo.Result = transactionDto.Amount;
+            //    Amount = transactionDto.Amount,
+            //    CurrencyCodeFrom = transactionDto.CurrencyCodeFrom,
+            //    CurrencyCodeTo = transactionDto.CurrencyCodeTo,
+            //    OperationDate = DateTime.Now,
+            //    OperationTitle = "Currency convert",
+            //};
 
-            //    operationInfo.CurrencyMidFrom = 1;
-            //    operationInfo.CurrencyMidTo = 1;
-            //}
-            //else if (transactionDto.CurrencyFrom == "PLN")
-            //{
-            //    operationInfo.Result = transactionDto.Amount /
-            //    rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyTo).Mid;
+            operationInfo.Result = transactionDto.Amount *
+            rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyCodeFrom).Mid /
+            rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyCodeTo).Mid;
 
-            //    operationInfo.CurrencyMidFrom = 1;
-            //    operationInfo.CurrencyMidTo = rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyTo).Mid;
-            //}
-            //else if (transactionDto.CurrencyTo == "PLN")
-            //{
-            //    operationInfo.Result = transactionDto.Amount *
-            //    rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyFrom).Mid;
-
-            //    operationInfo.CurrencyMidFrom = rates.Where(x => x.Code == transactionDto.CurrencyFrom).Select(x => x.Mid).Single();
-            //    operationInfo.CurrencyMidTo = 1;
-            //}
-            //else
-            {
-                operationInfo.Result = transactionDto.Amount *
-                rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyFrom).Mid/
-                rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyTo).Mid;
-
-                operationInfo.CurrencyMidFrom = rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyFrom).Mid;
-                operationInfo.CurrencyMidTo = rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyTo).Mid;
-            }
+            operationInfo.CurrencyMidFrom = rates.FirstOrDefault(x => x.Code == transactionDto.CurrencyCodeFrom).Mid;
 
             await _currencyConverterRepository.AddOperationInfoAsync(operationInfo);
 
@@ -106,11 +87,17 @@ namespace NBPCurrencyConverter.Core.Services
             }
 
             var content = JsonConvert.DeserializeObject<ICollection<TableRates>>(json);
-            ICollection<Rate> rates = null;
-            foreach (var item in content) { rates = item.Rates; };
+            List<Rate> rates = null;
+            foreach (var item in content)
+                rates = item.Rates;
 
-            rates.Add(new Rate { Code = "PLN", Mid = 1.0000m, Currency = "Polski złoty" });
+            await Task.Run(() =>
+            {
+                rates.Add(new Rate { Code = "PLN", Mid = 1.0000m, Currency = "Polski złoty" });
+                
+            });
             return rates;
+
         }
     }
 }

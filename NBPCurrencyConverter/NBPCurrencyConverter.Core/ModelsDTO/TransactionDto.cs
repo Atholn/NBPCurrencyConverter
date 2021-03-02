@@ -9,7 +9,7 @@ namespace NBPCurrencyConverter.Core.ModelsDTO
     public class TransactionDto
     {
         public decimal Amount { get; set; }
-        public string CurrencyFrom { get; set; }
-        public string CurrencyTo { get; set; }
+        public string CurrencyCodeFrom { get; set; }
+        public string CurrencyCodeTo { get; set; }
     }
 }
