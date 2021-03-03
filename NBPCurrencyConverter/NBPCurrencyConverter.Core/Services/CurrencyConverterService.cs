@@ -38,7 +38,7 @@ namespace NBPCurrencyConverter.Core.Services
 
             var rates = await GetListCurrencyAsync();
 
-            if(rates == null)
+            if (rates == null)
             {
                 throw new Exception($"Downloading currency collection failed.");
             }
@@ -46,7 +46,7 @@ namespace NBPCurrencyConverter.Core.Services
             transaction.CurrencyCodeFrom = transaction.CurrencyCodeFrom.ToUpper();
             transaction.CurrencyCodeTo = transaction.CurrencyCodeTo.ToUpper();
 
-            if (!rates.Any(x=> x.Code == transaction.CurrencyCodeFrom) 
+            if (!rates.Any(x => x.Code == transaction.CurrencyCodeFrom)
                 || !rates.Any(x => x.Code == transaction.CurrencyCodeTo))
             {
                 throw new Exception($"Bad currency code, It is not in the list of currencies");
@@ -74,9 +74,9 @@ namespace NBPCurrencyConverter.Core.Services
 
             await _currencyConverterRepository
                 .AddOperationCurrencyRetrievesInfoAsync(
-                new OperationCurrencyRetrievesInfo() 
-                { 
-                    OperationDate = DateTime.Now, 
+                new OperationCurrencyRetrievesInfo()
+                {
+                    OperationDate = DateTime.Now,
                     OperationTitle = "Retrives list currency rates"
                 });
 
@@ -120,7 +120,6 @@ namespace NBPCurrencyConverter.Core.Services
             await Task.Run(() =>
             {
                 rates.Add(new Rate { Code = "PLN", Mid = 1.0000m, Currency = "Polski złoty" });
-                
             });
             return rates;
         }
