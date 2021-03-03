@@ -38,16 +38,21 @@ namespace NBPCurrencyConverter.Core.Services
 
             var rates = await GetListCurrencyAsync();
 
+            if(rates == null)
+            {
+                throw new Exception($"Downloading currency collection failed.");
+            }
+
+            transaction.CurrencyCodeFrom = transaction.CurrencyCodeFrom.ToUpper();
+            transaction.CurrencyCodeTo = transaction.CurrencyCodeTo.ToUpper();
+
             if (!rates.Any(x=> x.Code == transaction.CurrencyCodeFrom) 
                 || !rates.Any(x => x.Code == transaction.CurrencyCodeTo))
             {
                 throw new Exception($"Bad currency code, It is not in the list of currencies");
             }
 
-            transaction.CurrencyCodeFrom = transaction.CurrencyCodeFrom.ToUpper();
-            transaction.CurrencyCodeTo = transaction.CurrencyCodeTo.ToUpper();
-
-            var operationInfo = _mapper.Map<OperationInfo>(transaction);
+            var operationInfo = _mapper.Map<OperationConvertInfo>(transaction);
             operationInfo.OperationDate = DateTime.Now;
             operationInfo.OperationTitle = "Currency convert";
 
@@ -56,21 +61,40 @@ namespace NBPCurrencyConverter.Core.Services
             rates.FirstOrDefault(x => x.Code == transaction.CurrencyCodeTo).Mid;
 
             operationInfo.CurrencyMidFrom = rates.FirstOrDefault(x => x.Code == transaction.CurrencyCodeFrom).Mid;
+            operationInfo.CurrencyMidTo = rates.FirstOrDefault(x => x.Code == transaction.CurrencyCodeTo).Mid;
 
-            await _currencyConverterRepository.AddOperationInfoAsync(operationInfo);
+            await _currencyConverterRepository.AddOperationConvertInfoAsync(operationInfo);
 
             return Decimal.Round(operationInfo.Result, 2);
         }
 
-        public async Task<ICollection<Rate>> GetListCurrencyOfRatesAsync()
+        public async Task<ICollection<Rate>> GetListCurrencyRatesAsync()
         {
             var rates = await GetListCurrencyAsync();
+
+            await _currencyConverterRepository
+                .AddOperationCurrencyRetrievesInfoAsync(
+                new OperationCurrencyRetrievesInfo() 
+                { 
+                    OperationDate = DateTime.Now, 
+                    OperationTitle = "Retrives list currency rates"
+                });
+
             return rates;
         }
 
-        public async Task<ICollection<string>> GetListCurrencyCodeAsync()
+        public async Task<ICollection<string>> GetListCurrencyCodesAsync()
         {
             var rates = await GetListCurrencyAsync();
+
+            await _currencyConverterRepository
+                .AddOperationCurrencyRetrievesInfoAsync(
+                new OperationCurrencyRetrievesInfo()
+                {
+                    OperationDate = DateTime.Now,
+                    OperationTitle = "Retrives list currency codes"
+                });
+
             return rates.Select(x => x.Code).ToList();
         }
 

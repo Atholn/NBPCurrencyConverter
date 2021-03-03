@@ -8,6 +8,7 @@ namespace NBPCurrencyConverter.Data.Repositories.Interfaces
 {
     public interface ICurrencyConverterRepository
     {
-        Task AddOperationInfoAsync(OperationInfo operationInfo); 
+        Task AddOperationConvertInfoAsync(OperationConvertInfo operationConvertInfo); 
+        Task AddOperationCurrencyRetrievesInfoAsync(OperationCurrencyRetrievesInfo operationCurrencyRetrievesInfo); 
     }
 }

@@ -15,9 +15,16 @@ namespace NBPCurrencyConverter.Data.Repositories
             _context = context;
         }
 
-        public async Task AddOperationInfoAsync(OperationInfo operationInfo)
+        public async Task AddOperationConvertInfoAsync(OperationConvertInfo operationConvertInfo)
         {
-            await _context.OperationsInfo.AddAsync(operationInfo);
+            await _context.OperationsConvertInfo.AddAsync(operationConvertInfo);
+            await _context.SaveChangesAsync();
+            await Task.CompletedTask;
+        }
+
+        public async Task AddOperationCurrencyRetrievesInfoAsync(OperationCurrencyRetrievesInfo operationCurrencyRetrievesInfo)
+        {          
+            await _context.OperationsRetrivesCurrencyInfo.AddAsync(operationCurrencyRetrievesInfo);
             await _context.SaveChangesAsync();
             await Task.CompletedTask;
         }
