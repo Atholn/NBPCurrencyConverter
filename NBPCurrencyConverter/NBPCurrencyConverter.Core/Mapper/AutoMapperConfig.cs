@@ -13,7 +13,7 @@ namespace NBPCurrencyConverter.Core.Mapper
     {
         public static IMapper Initialize() => new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<TransactionDto, OperationInfo>();
+            cfg.CreateMap<TransactionDto, OperationConvertInfo>();
         }).CreateMapper();
     }
 }

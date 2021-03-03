@@ -33,7 +33,7 @@ namespace NBPCurrencyConverter.Api.Controllers
         [HttpGet("Code")]
         public async Task<ActionResult> GetCodeCurrency()
         {
-            var result = await _currencyConverterService.GetListCurrencyCodeAsync();
+            var result = await _currencyConverterService.GetListCurrencyCodesAsync();
             return Ok(result);
         }
 
@@ -41,7 +41,7 @@ namespace NBPCurrencyConverter.Api.Controllers
         [HttpGet("Currency")]
         public async Task<ActionResult> GetCurrencyOfRates()
         {
-            var result = await _currencyConverterService.GetListCurrencyOfRatesAsync();
+            var result = await _currencyConverterService.GetListCurrencyRatesAsync();
 
             return Ok(result);
         }

@@ -8,7 +8,8 @@ namespace NBPCurrencyConverter.Data
 {
     public class BaseContext : DbContext
     {
-        public DbSet<OperationInfo> OperationsInfo { get; set; }
+        public DbSet<OperationConvertInfo> OperationsConvertInfo { get; set; }
+        public DbSet<OperationCurrencyRetrievesInfo> OperationsRetrivesCurrencyInfo { get; set; }
 
         public BaseContext(DbContextOptions options) : base(options)
         {

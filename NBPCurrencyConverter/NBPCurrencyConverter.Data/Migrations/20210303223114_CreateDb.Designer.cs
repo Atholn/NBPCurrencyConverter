@@ -10,8 +10,8 @@ using NBPCurrencyConverter.Data;
 namespace NBPCurrencyConverter.Data.Migrations
 {
     [DbContext(typeof(BaseContext))]
-    [Migration("20210302154831_UpdateOperationsInfoTable")]
-    partial class UpdateOperationsInfoTable
+    [Migration("20210303223114_CreateDb")]
+    partial class CreateDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,7 +21,7 @@ namespace NBPCurrencyConverter.Data.Migrations
                 .HasAnnotation("ProductVersion", "5.0.3")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("NBPCurrencyConverter.Data.Models.OperationInfo", b =>
+            modelBuilder.Entity("NBPCurrencyConverter.Data.Models.OperationConvertInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,7 +54,25 @@ namespace NBPCurrencyConverter.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OperationsInfo");
+                    b.ToTable("OperationsConvertInfo");
+                });
+
+            modelBuilder.Entity("NBPCurrencyConverter.Data.Models.OperationCurrencyRetrievesInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("OperationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OperationTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OperationsRetrivesCurrencyInfo");
                 });
 #pragma warning restore 612, 618
         }

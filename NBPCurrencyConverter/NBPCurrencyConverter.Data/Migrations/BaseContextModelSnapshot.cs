@@ -19,7 +19,7 @@ namespace NBPCurrencyConverter.Data.Migrations
                 .HasAnnotation("ProductVersion", "5.0.3")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("NBPCurrencyConverter.Data.Models.OperationInfo", b =>
+            modelBuilder.Entity("NBPCurrencyConverter.Data.Models.OperationConvertInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -52,7 +52,25 @@ namespace NBPCurrencyConverter.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OperationsInfo");
+                    b.ToTable("OperationsConvertInfo");
+                });
+
+            modelBuilder.Entity("NBPCurrencyConverter.Data.Models.OperationCurrencyRetrievesInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("OperationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OperationTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OperationsRetrivesCurrencyInfo");
                 });
 #pragma warning restore 612, 618
         }
