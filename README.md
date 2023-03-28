@@ -1,1 +1,1 @@
-# NBPCurrencyConverter - recruitment task KAMBU
+# NBPCurrencyConverter
